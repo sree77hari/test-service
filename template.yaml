@@ -162,11 +162,11 @@ parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
   required: true
-  value: tasks
+  value: tasksapp
 - description: Git source URI for application
   name: SOURCE_URL
   required: true
   value: https://github.com/sree77hari/test.git
 - description: Git branch/tag reference
   name: SOURCE_REF
-  value: master
+  value: main
