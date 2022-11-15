@@ -31,7 +31,7 @@ pipeline{
                   echo "BuildConfig status contains: '${buildconf}'"
 
                   if(buildconf == 'false') {
-                    sh "oc apply -f ${templatePath}/template.yaml -n ${DEV_NAMESPACE}
+                    sh "oc apply -f ${templatePath}/template.yaml -n ${DEV_NAMESPACE}"
                     sh "oc new-app ${templatePath} -n ${DEV_NAMESPACE}"
                   } else {
                     echo "Template is already exist. Hence, skipping this stage."
