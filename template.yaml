@@ -162,7 +162,7 @@ parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
   required: true
-  value: testapp
+  value: test-service
 - description: Git source URI for application
   name: SOURCE_URL
   required: true
