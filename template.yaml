@@ -58,7 +58,7 @@ objects:
         forcePull: true
         from:
           kind: ImageStreamTag
-          name: default-route-openshift-image-registry.apps.cluster-gbtvh.sandbox942.opentlc.com/openshift/tasks-app:latest
+          name: default-route-openshift-image-registry.apps.cluster-gbtvh.sandbox942.opentlc.com/openshift/test-service:latest
           namespace: openshift
       type: Source
     triggers:
