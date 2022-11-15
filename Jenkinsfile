@@ -1,7 +1,7 @@
 #!bash
 pipeline{
    agent{
-      label 'docker'
+      label 'skopeo'
    }
    environment {
       appName = "test-service"
