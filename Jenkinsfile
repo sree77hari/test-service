@@ -8,7 +8,7 @@ pipeline{
       buildconf = "false"
       DEV_NAMESPACE = "dev"
       DEV_API_SERVER = "https://api.cluster-gbtvh.sandbox942.opentlc.com:6443"
-      templatePath = "/tmp/workspace/cicd/dev/template.json"
+      templatePath = "/tmp/workspace/cicd/dev/template.yaml"
    }
    stages {
       stage('Common Lib checkout') {
