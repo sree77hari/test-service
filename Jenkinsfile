@@ -14,7 +14,7 @@ pipeline{
       stage('Common Lib checkout') {
         steps {
            git branch: 'main',
-           url: 'https://github.com/sree77hari/test.git'
+           url: 'https://github.com/sree77hari/test-service.git'
           }
       }
       stage('Deploy Template in DEV Namespace') {
