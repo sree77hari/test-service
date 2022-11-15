@@ -1,212 +1,172 @@
-{
-	"kind": "Template",
-	"apiVersion": "template.openshift.io/v1",
-	"metadata": {
-	   "name": "${APP_NAME}",
-	   "annotations": {
-		    "tags": "${APP_NAME}",
-		    "iconClass": "icon-${APP_NAME}"
-	   }
-	},
-	"labels": {
-    "template": "${APP_NAME}",
-    "app": "${APP_NAME}"
-  },
-	"objects": [
-    {
-      "kind": "BuildConfig",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${APP_NAME}",
-        "labels": {
-          "app": "${APP_NAME}"
-        }
-      },
-      "spec": {
-        "source": {
-          "type": "Binary",
-          "binary": {
-          }
-        },
-        "strategy": {
-          "type": "Source",
-          "sourceStrategy": {
-            "from": {
-              "kind": "ImageStreamTag",
-              "namespace": "openshift",
-              "name": "default-route-openshift-image-registry.apps.cluster-gbtvh.sandbox942.opentlc.com/openshift/tasks-app:latest"
-            }
-          }
-        },
-        "output": {
-          "to": {
-            "kind": "ImageStreamTag",
-            "name": "${APP_NAME}:latest"
-          }
-        },
-        "triggers": []
-      }
-    },
-    {
-      "kind": "DeploymentConfig",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${APP_NAME}",
-        "labels": {
-          "app": "${APP_NAME}"
-        }
-      },
-      "spec": {
-        "replicas": 1,
-        "selector": {
-          "name": "${APP_NAME}"
-        },
-        "strategy": {
-          "rollingParams": {
-            "maxSurge": "25%",
-            "maxUnavailable": "25%"
-          },
-          "type": "Rolling"
-        },
-        "triggers": [
-        {
-          "type": "ImageChange",
-          "imageChangeParams": {
-            "automatic": true,
-            "containerNames": [
-              "${APP_NAME}"
-            ],
-            "from": {
-              "kind": "ImageStreamTag",
-              "name": "${APP_NAME}:latest"
-            }
-          }
-        },
-        {
-          "type": "ConfigChange"
-        }
-        ],
-        "template": {
-          "metadata": {
-            "labels": {
-              "name": "${APP_NAME}"
-            },
-            "name": "${APP_NAME}"
-          },
-          "spec": {
-            "containers": [
-            {
-              "name": "${APP_NAME}",
-              "image": "image-registry.openshift-image-registry.svc:5000/${PROJECT}/${APP_NAME}:latest",
-              "imagePullPolicy": "IfNotPresent",
-              "env": [
-                {
-                  "name": "TZ",
-                  "value": "Asia/Kolkata"
-                }
-              ],
-              "envFrom": [
-                {
-                  "secretRef": {
-                    "name": "database-secret"
-                  }
-                },
-                {
-                  "configMapRef": {
-                    "name": "database-configmap"
-                  }
-                }
-              ],
-              "ports": [
-                {
-                  "containerPort": 8080,
-                  "protocol": "TCP"
-                },
-                {
-                  "containerPort": 8443,
-                  "protocol": "TCP"
-                },
-                {
-                  "containerPort": 8778,
-                  "protocol": "TCP"
-                }
-              ],
-              "resources": {},
-              "terminationMessagePath": "/dev/termination-log",
-              "securityContext": {}
-            }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "kind": "Service",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${APP_NAME}",
-        "labels": {
-          "app": "${APP_NAME}"
-        },
-        "annotations": {
-          "description": "Expose the Application."
-        }
-      },
-      "spec": {
-        "ports": [
-          {
-            "name": "8080-tcp",
-            "port": 8080,
-            "targetPort": 8080
-          },
-          {
-            "name": "8443-tcp",
-            "port": 8443,
-            "targetPort": 8443
-          },
-          {
-            "name": "8778-tcp",
-            "port": 8778,
-            "targetPort": 8778
-          }
-        ],
-        "selector": {
-          "name": "${APP_NAME}"
-        }
-      }
-    },
-    {
-      "kind": "Route",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${APP_NAME}",
-        "labels": {
-            "app": "${APP_NAME}"
-        },
-        "annotations": {
-            "description": "Route for application's http service"
-        }
-      },
-      "spec": {
-        "port": {
-          "targetPort": "8080-tcp"
-        },
-        "to": {
-          "kind": "Service",
-          "name": "${APP_NAME}"
-        }
-      }
-    }
-  ],
-  "parameters": [
-    {
-      "name": "APP_NAME",
-      "displayName": "Name of the Application."
-    },
-    {
-      "name": "PROJECT",
-      "displayName": "Project",
-      "description": "Environment to be deployed on."
-    }
-  ]
-}
+apiVersion: v1
+kind: Template
+labels:
+  template: openshift-test
+metadata:
+  name: openshift-test
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: The web server's http port.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - port: 8080
+      targetPort: 8080
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+- apiVersion: v1
+  id: ${APPLICATION_NAME}-http
+  kind: Route
+  metadata:
+    annotations:
+      description: Route for application's http service.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    to:
+      name: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    source:
+      git:
+        ref: ${SOURCE_REF}
+        uri: ${SOURCE_URL}
+      type: Git
+    strategy:
+      sourceStrategy:
+        forcePull: true
+        from:
+          kind: ImageStreamTag
+          name: default-route-openshift-image-registry.apps.cluster-gbtvh.sandbox942.opentlc.com/openshift/tasks-app:latest
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: kJZLvfQr3hZg
+      type: GitHub
+    - generic:
+        secret: kJZLvfQr3hZg
+      type: Generic
+    - imageChange: {}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    replicas: 1
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          application: ${APPLICATION_NAME}
+          deploymentConfig: ${APPLICATION_NAME}
+        name: ${APPLICATION_NAME}
+      spec:
+        containers:
+        - env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: OPENSHIFT_KUBE_PING_LABELS
+            value: application=${APPLICATION_NAME}
+          - name: OPENSHIFT_KUBE_PING_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: HORNETQ_CLUSTER_PASSWORD
+            value: kJZLvfQr3hZg
+          - name: JGROUPS_CLUSTER_PASSWORD
+            value: kJZLvfQr3hZg
+          image: ${APPLICATION_NAME}
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/demo/healthcheck
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 45
+            periodSeconds: 45
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: ${APPLICATION_NAME}
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8888
+            name: ping
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/demo/healthcheck
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+        terminationGracePeriodSeconds: 60
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APPLICATION_NAME}
+        from:
+          kind: ImageStream
+          name: ${APPLICATION_NAME}
+      type: ImageChange
+    - type: ConfigChange
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: testapp
+- description: Git source URI for application
+  name: SOURCE_URL
+  required: true
+  value: https://github.com/sree77hari/test.git
+- description: Git branch/tag reference
+  name: SOURCE_REF
+  value: main
