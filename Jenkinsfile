@@ -6,7 +6,7 @@ pipeline{
    environment {
       appName = "test-service"
       buildconf = "false"
-      DEV_NAMESPACE = "dev"
+      DEV_NAMESPACE = "bookstore-dev"
       DEV_API_SERVER = "https://api.cluster-gbtvh.sandbox942.opentlc.com:6443"
       templatePath = "/tmp/workspace/cicd/dev"
    }
