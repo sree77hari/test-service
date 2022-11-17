@@ -1,9 +1,9 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  template: ${APPLICATION_NAME}
+  template: test-service
 metadata:
-  name: ${APPLICATION_NAME}
+  name: test-service
 objects:
 - apiVersion: v1
   kind: ImageStream
