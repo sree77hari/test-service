@@ -26,7 +26,7 @@ pipeline{
 			echo "Using project: ${openshift.project()}"
 			echo "${env.PROJECT}"
 			echo "${appName}"
-			if(!openshift.selector("svc",[template:"${appName}"]).exists() || !openshift.selector("dc",[template:"${appName}"]).exists() || !openshift.selector("route",[template:"${appName}"]).exists()){
+			if(!openshift.selector("svc",[application:"${appName}"]).exists() || !openshift.selector("dc",[application:"${appName}"]).exists() || !openshift.selector("route",[template:"${appName}"]).exists()){
 
 			    openshift.newApp(templatePath/template.yaml)
 			}
