@@ -28,7 +28,6 @@ pipeline{
 			if(!openshift.selector("svc",[template:"${appName}"]).exists() || !openshift.selector("dc",[template:"${appName}"]).exists() || !openshift.selector("route",[template:"${appName}"]).exists()){
 
 			    openshift.newApp(templatePath/template.yaml)
-			}
  		     }
 		  }
 	       }
