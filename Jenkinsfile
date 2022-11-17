@@ -6,7 +6,7 @@ pipeline{
    environment {
       appName = "test-service"
       buildconf = "false"
-      DEV_NAMESPACE = "dev"
+      DEV_NAMESPACE = "bookstore-dev"
       DEV_API_SERVER = "https://api.cluster-gbtvh.sandbox942.opentlc.com:6443"
       templatePath = "/tmp/workspace/cicd/dev"
    }
@@ -16,6 +16,29 @@ pipeline{
            git branch: 'main',
            url: 'https://github.com/sree77hari/test-service.git'
           }
+      }
+      stage('Deploy Template Dev') {
+	 steps {
+	    script {
+	       try {
+		  openshift.withCluster(){
+		     openshift.withProject("${env.PROJECT}"){
+			echo "Using project: ${openshift.project()}"
+			echo "${env.PROJECT}"
+			echo "${appName}"
+			if(!openshift.selector("svc",[template:"${appName}"]).exists() || !openshift.selector("dc",[template:"${appName}"]).exists() || !openshift.selector("route",[template:"${appName}"]).exists()){
+
+			    openshift.newApp(templatePath/template.yaml)
+			}
+ 		     }
+		  }
+	       }
+	       catch(e){
+		  print e.getMessage()
+		  echo "This stage has an exception that can be ignored."
+	       }
+	    }
+	 }
       }
       stage('Deploy Template in DEV Namespace') {
         steps{
@@ -31,7 +54,7 @@ pipeline{
                   echo "BuildConfig status contains: '${buildconf}'"
 
                   if(buildconf == 'false') {
-                    sh "oc new-app ${templatePath} -n ${DEV_NAMESPACE}"
+                    sh "oc new-app ${templatePath/template.yaml} --as-deployment-config -n ${DEV_NAMESPACE}"
                   } else {
                     echo "Template is already exist. Hence, skipping this stage."
                   }
