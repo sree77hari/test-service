@@ -17,27 +17,6 @@ pipeline{
            url: 'https://github.com/sree77hari/test-service.git'
           }
       }
-      stage('Deploy Template Dev') {
-	 steps {
-	    script {
-	       try {
-                withCredentials([usernamePassword(credentialsId: 'dev-ocp-credentials', passwordVariable: 'DEV_OCP_PASSWD', usernameVariable: 'DEV_OCP_USER')]) {
-                  echo "Using AppName: ${appName}"
-                  sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true')
-			echo "${appName}"
-			if(!openshift.selector("svc",[template:"${appName}"]).exists() || !openshift.selector("dc",[template:"${appName}"]).exists() || !openshift.selector("route",[template:"${appName}"]).exists()){
-
-			    openshift.newApp(templatePath/template.yaml)
- 		     }
-		  }
-	       }
-	       catch(e){
-		  print e.getMessage()
-		  echo "This stage has an exception that can be ignored."
-	       }
-	    }
-	 }
-      }
       stage('Deploy Template in DEV Namespace') {
         steps{
            script {
