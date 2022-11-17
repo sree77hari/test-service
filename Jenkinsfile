@@ -31,7 +31,7 @@ pipeline{
                   echo "BuildConfig status contains: '${buildconf}'"
 
                   if(buildconf == 'false') {
-                    sh "oc new-app --file=${templatePath/template.yaml} -n ${DEV_NAMESPACE}"
+                    sh "oc new-app --file=${templatePath} -n ${DEV_NAMESPACE}"
                   } else {
                     echo "Template is already exist. Hence, skipping this stage."
                   }
