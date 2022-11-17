@@ -21,10 +21,9 @@ pipeline{
 	 steps {
 	    script {
 	       try {
-		  openshift.withCluster(){
-		     openshift.withProject("${env.PROJECT}"){
-			echo "Using project: ${openshift.project()}"
-			echo "${env.PROJECT}"
+                withCredentials([usernamePassword(credentialsId: 'dev-ocp-credentials', passwordVariable: 'DEV_OCP_PASSWD', usernameVariable: 'DEV_OCP_USER')]) {
+                  echo "Using AppName: ${appName}"
+                  sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true')
 			echo "${appName}"
 			if(!openshift.selector("svc",[template:"${appName}"]).exists() || !openshift.selector("dc",[template:"${appName}"]).exists() || !openshift.selector("route",[template:"${appName}"]).exists()){
 
